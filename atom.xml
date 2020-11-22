@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://changzee.github.io.git</id>
     <title>顶洋小巷</title>
-    <updated>2020-11-22T08:37:19.786Z</updated>
+    <updated>2020-11-22T08:38:54.205Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="http://changzee.github.io.git"/>
     <link rel="self" href="http://changzee.github.io.git/atom.xml"/>
@@ -10,6 +10,87 @@
     <logo>http://changzee.github.io.git/images/avatar.png</logo>
     <icon>http://changzee.github.io.git/favicon.ico</icon>
     <rights>All rights reserved 2020, 顶洋小巷</rights>
+    <entry>
+        <title type="html"><![CDATA[日常用到的一些开发工具汇总与推荐]]></title>
+        <id>http://changzee.github.io.git/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/</id>
+        <link href="http://changzee.github.io.git/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/">
+        </link>
+        <updated>2020-11-22T08:38:06.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="windows-软件">Windows 软件</h2>
+<h3 id="包管理工具-scoop">包管理工具 - [Scoop]</h3>
+<p><a href="https://scoop.sh/">官网</a></p>
+<h2 id="jetbrains全家桶可用学生邮箱申请license">JetBrains全家桶(可用学生邮箱申请License)</h2>
+<h3 id="数据库管理工具-datagrip">数据库管理工具 - DataGrip</h3>
+<h3 id="php语言开发ide-phpstrom">PHP语言开发IDE - PHPSTROM</h3>
+<h3 id="go语言开发ide-golang">Go语言开发IDE - Golang</h3>
+<h3 id="c语言开发ide-clion">C语言开发IDE - Clion</h3>
+<p><a href="https://www.jetbrains.com/">官网</a></p>
+<h3 id="终端管理工具-window-terminal预览版">终端管理工具 - window terminal(预览版)</h3>
+<figure data-type="image" tabindex="1"><img src="http://wiki.meiyou.com/download/attachments/41627539/image2019-12-8_13-28-14.png?version=1&amp;modificationDate=1575782894552&amp;api=v2" alt="商业产品技术中心 &gt; 常用开发软件(window篇) &gt; image2019-12-8_13-28-14.png" loading="lazy"></figure>
+<p>可在microsoft store上直接安装</p>
+<figure data-type="image" tabindex="2"><img src="http://wiki.meiyou.com/download/attachments/41627539/image2019-12-8_13-29-38.png?version=1&amp;modificationDate=1575782978720&amp;api=v2" alt="商业产品技术中心 &gt; 常用开发软件(window篇) &gt; image2019-12-8_13-29-38.png" loading="lazy"></figure>
+<h3 id="终端必备神器-oh-my-zsh"><strong>终端必备神器 - Oh my zsh!</strong></h3>
+<figure data-type="image" tabindex="3"><img src="https://ohmyz.sh/img/themes/nebirhos.jpg" alt="nebirhos" loading="lazy"></figure>
+<pre><code class="language-powershell">sudo apt-get install zsh
+sh -c &quot;$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;
+</code></pre>
+<h3 id="hosts管理工具-switchhosts">Hosts管理工具 - SwitchHosts!</h3>
+<figure data-type="image" tabindex="4"><img src="https://raw.githubusercontent.com/oldj/SwitchHosts/master/screenshots/sh_light.png" alt="Capture" loading="lazy"></figure>
+<p><a href="https://oldj.github.io/SwitchHosts/">官网</a></p>
+<h3 id="压缩-解压缩工具-7zip">压缩 &amp;&amp; 解压缩工具 - 7zip</h3>
+<p><a href="https://www.7-zip.org/">官网</a></p>
+<pre><code class="language-powershell"># 通过 scoop 安装
+scoop install 7zip
+</code></pre>
+<h3 id="快速搜索工具-everything">快速搜索工具 - Everything</h3>
+<p><a href="https://www.voidtools.com/">官网</a></p>
+<pre><code class="language-powershell">scoop install everything
+</code></pre>
+<h3 id="快速启动工具window上的alfred-wox-listary-任选一个">快速启动工具(window上的Alfred）- Wox || Listary （任选一个）</h3>
+<figure data-type="image" tabindex="5"><img src="http://wiki.meiyou.com/download/attachments/41627539/image2019-12-8_13-25-43.png?version=1&amp;modificationDate=1575782743412&amp;api=v2" alt="商业产品技术中心 &gt; 常用开发软件(window篇) &gt; image2019-12-8_13-25-43.png" loading="lazy"></figure>
+<p><a href="http://www.wox.one/">wox</a> <a href="https://www.listary.com/">listary</a></p>
+<pre><code class="language-powershell">scoop install wox
+scoop install listary
+</code></pre>
+<h3 id="编辑工具-vscode-sublime">编辑工具 - VSCode &amp;&amp; sublime</h3>
+<p><a href="https://code.visualstudio.com/">vscode</a> <a href="https://www.sublimetext.com/">sublime</a></p>
+<pre><code class="language-powershell">scoop install vscode
+scoop install sublime-text
+</code></pre>
+<h3 id="屏幕显示按钮工具-carnac">屏幕显示按钮工具 - carnac</h3>
+<p><a href="https://github.com/Code52/carnac">github</a></p>
+<pre><code class="language-powershell">scoop install carnac
+</code></pre>
+<h3 id="markdown-编辑器-typora-mermaid">Markdown 编辑器 - Typora &amp;&amp; mermaid</h3>
+<p><a href="https://typora.io/">typora</a> <a href="https://mermaidjs.github.io/">mermaid</a></p>
+<pre><code class="language-powershell">scoop install typora
+</code></pre>
+<h3 id="卸载工具-geek-uninstaller">卸载工具 - Geek uninstaller</h3>
+<pre><code class="language-powershell">scoop install geekuninstaller
+</code></pre>
+<h3 id="视频播放器-mpc-be">视频播放器 - mpc-be</h3>
+<pre><code class="language-powrshell">scoop install mpc-be
+</code></pre>
+<h3 id="视频录制-直播工具-obs-studio">视频录制 / 直播工具 - OBS-studio</h3>
+<p><a href="https://obsproject.com/">官网</a></p>
+<pre><code class="language-powershell">scoop install obs-studio
+</code></pre>
+<h3 id="刻录工具-rufus">刻录工具 - Rufus</h3>
+<p><a href="http://rufus.ie/">官网</a></p>
+<pre><code class="language-powershell">scoop install rufus
+</code></pre>
+<h3 id="快速预览工具-quicklook">快速预览工具 - QuickLook</h3>
+<p>微软应用商店获取 uwp 版本，scoop 可以获取常规版本</p>
+<pre><code class="language-powershell">scoop install quicklook
+</code></pre>
+<h2 id="vscode-插件">VSCode 插件</h2>
+<h3 id="uml-工具-plantuml">UML 工具 - plantUML</h3>
+<p><a href="http://plantuml.com/">homepage</a></p>
+<h3 id="http-client-rest-client">Http Client - REST Client</h3>
+<h3 id="json-显示插件-json-viewer-awesome">JSON 显示插件 - JSON Viewer Awesome</h3>
+<h3 id="github-目录树-octotree">Github 目录树 - Octotree</h3>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[golang web项目统一响应风格及错误处理机制]]></title>
         <id>http://changzee.github.io.git/post/golang-web-xiang-mu-tong-yi-xiang-ying-feng-ge-ji-cuo-wu-chu-li-ji-zhi/</id>
