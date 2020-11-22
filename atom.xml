@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://changzee.github.io.git</id>
     <title>顶洋小巷</title>
-    <updated>2020-11-22T08:42:12.679Z</updated>
+    <updated>2020-11-22T08:46:54.003Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="http://changzee.github.io.git"/>
     <link rel="self" href="http://changzee.github.io.git/atom.xml"/>
@@ -10,27 +10,6 @@
     <logo>http://changzee.github.io.git/images/avatar.png</logo>
     <icon>http://changzee.github.io.git/favicon.ico</icon>
     <rights>All rights reserved 2020, 顶洋小巷</rights>
-    <entry>
-        <title type="html"><![CDATA[Laravel实践中遇到的一些坑]]></title>
-        <id>http://changzee.github.io.git/post/laravel-shi-jian-zhong-yu-dao-de-yi-xie-keng/</id>
-        <link href="http://changzee.github.io.git/post/laravel-shi-jian-zhong-yu-dao-de-yi-xie-keng/">
-        </link>
-        <updated>2020-11-22T08:39:41.000Z</updated>
-        <content type="html"><![CDATA[<ol>
-<li>
-<p><code>mpociot/laravel-apidoc-generator</code>由于注释星号个数问题导致生成的接口文档缺失。正确格式为 <code>/** xxxx */</code>, 开头的星号只能为2个</p>
-</li>
-<li>
-<p><code>mpociot/laravel-apidoc-generator</code>运行文档生成命令时碰到下面的错误:</p>
-<pre><code>In SKUserProductController.php line 216:
-
-Unparenthesized `a ? b : c ? d : e` is deprecated. Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)`
-</code></pre>
-<p>原因是PHP7.4不支持了三元表达式的一些写法，更正对应的代码块或者用低版本的PHP运行。</p>
-</li>
-</ol>
-]]></content>
-    </entry>
     <entry>
         <title type="html"><![CDATA[日常用到的一些开发工具汇总与推荐]]></title>
         <id>http://changzee.github.io.git/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/</id>
@@ -113,12 +92,103 @@ scoop install sublime-text
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[Golang如何跳出for...select循环]]></title>
+        <id>http://changzee.github.io.git/post/golang-ru-he-tiao-chu-forselect-xun-huan/</id>
+        <link href="http://changzee.github.io.git/post/golang-ru-he-tiao-chu-forselect-xun-huan/">
+        </link>
+        <updated>2020-10-21T08:44:35.000Z</updated>
+        <content type="html"><![CDATA[<p>在<code>select</code>在<code>for</code>循环体中，无法直接通过<code>break</code>关键字退出执行体，而是需要一些<code>tick</code>。</p>
+<p>跟茴字的写法一致，跳出<code>for...select...</code>循环也有多种写法。</p>
+<h2 id="使用匿名函数">使用匿名函数</h2>
+<pre><code class="language-go">func () {
+  for {
+    select {
+      case &lt;-time.NewTicket(10 *time.Minute).C:
+        // do anothing thing ...
+        ...
+
+        if condition == true {
+          return
+        }
+    }
+  }
+}()
+</code></pre>
+<h2 id="使用break">使用break</h2>
+<pre><code class="language-go">Loop: for {
+  select {
+    case &lt;-time.NewTicket(10 *time.Minute).C:
+      // do anothing thing ...
+      ...
+
+      if condition == true {
+        break Loop
+      }
+  }
+}
+</code></pre>
+<h2 id="使用goto">使用goto</h2>
+<pre><code class="language-go">for {
+  select {
+    case &lt;-time.NewTicket(10 *time.Minute).C:
+      // do anothing thing ...
+      ...
+
+      if condition == true {
+        goto End
+      }
+  }
+}
+
+End:
+	// do something
+</code></pre>
+<h2 id="使用标记变量">使用标记变量</h2>
+<pre><code class="language-go">for condition { // 满足条件则不再执行
+  select {
+    case &lt;-time.NewTicket(10 *time.Minute).C:
+      // do anothing thing ...
+      ...
+
+      if condition { // 跳出select
+        break
+      }
+  }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Laravel实践中遇到的一些坑]]></title>
+        <id>http://changzee.github.io.git/post/laravel-shi-jian-zhong-yu-dao-de-yi-xie-keng/</id>
+        <link href="http://changzee.github.io.git/post/laravel-shi-jian-zhong-yu-dao-de-yi-xie-keng/">
+        </link>
+        <updated>2020-10-13T08:39:41.000Z</updated>
+        <content type="html"><![CDATA[<!-- more -->
+<ol>
+<li>
+<p><code>mpociot/laravel-apidoc-generator</code>由于注释星号个数问题导致生成的接口文档缺失。正确格式为 <code>/** xxxx */</code>, 开头的星号只能为2个</p>
+</li>
+<li>
+<p><code>mpociot/laravel-apidoc-generator</code>运行文档生成命令时碰到下面的错误:</p>
+<pre><code>In SKUserProductController.php line 216:
+
+Unparenthesized `a ? b : c ? d : e` is deprecated. Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)`
+</code></pre>
+<p>原因是PHP7.4不支持了三元表达式的一些写法，更正对应的代码块或者用低版本的PHP运行。</p>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[golang web项目统一响应风格及错误处理机制]]></title>
         <id>http://changzee.github.io.git/post/golang-web-xiang-mu-tong-yi-xiang-ying-feng-ge-ji-cuo-wu-chu-li-ji-zhi/</id>
         <link href="http://changzee.github.io.git/post/golang-web-xiang-mu-tong-yi-xiang-ying-feng-ge-ji-cuo-wu-chu-li-ji-zhi/">
         </link>
-        <updated>2020-11-22T08:35:47.000Z</updated>
-        <content type="html"><![CDATA[<p>这段时间一直在和golang和部门内部开发的go web框架打交道，发现其存在一些些小瑕疵，使用起来跟Gin差距比较明显。比如，由于它缺失了内部缺失了http api返回数据结构规范化及自定义的一些机制，同时对错误处理的方式没有一个比较好用的推荐姿势。所以我在项目应用层写了一两个package来做对应的优化。</p>
+        <updated>2020-09-23T08:35:47.000Z</updated>
+        <content type="html"><![CDATA[<!-- more -->
+<!-- more -->
+<p>这段时间一直在和golang和部门内部开发的go web框架打交道，发现其存在一些些小瑕疵，使用起来跟Gin差距比较明显。比如，由于它缺失了内部缺失了http api返回数据结构规范化及自定义的一些机制，同时对错误处理的方式没有一个比较好用的推荐姿势。所以我在项目应用层写了一两个package来做对应的优化。</p>
 <h3 id="更加优雅的输出姿势">更加优雅的输出姿势</h3>
 <h4 id="统一输出结构">统一输出结构:</h4>
 <pre><code class="language-go">// Standard means standard output struct
