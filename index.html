@@ -9,7 +9,7 @@
 <meta name="description" content="记录一些日常学习笔记与感想～">
 <meta name="theme-color" content="#000">
 <title>顶洋小巷</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1606034804619">
+<link rel="shortcut icon" href="/favicon.ico?v=1606034909016">
 <link rel="stylesheet" href="/media/css/gemini.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -184,7 +184,7 @@
     <div class="sidebar-item-box">
       <a href="/archives/">
         
-        <span class="site-item-stat-count">4</span>
+        <span class="site-item-stat-count">5</span>
         <span class="site-item-stat-name language" data-lan="article">文章</span>
       </a>
     </div>
@@ -288,6 +288,92 @@
         
         <div class="post-button text-center">
           <a class="btn language" data-lan="read-more" href="http://changzee.github.io.git/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/" rel="contents">
+            阅读全文 »
+          </a>
+        </div>
+        
+      </div>
+      
+    </div>
+  </article>
+
+  <article class="post-list-box  post box-shadow-wrapper">
+    <div class="article-wrapper bg-color">
+      <section class="post-header">
+  <h1 class="post-title">
+    <a class="post-title-link" href="http://changzee.github.io.git/post/select-case-shi-yong-shi-yu-dao-de-wen-ti/">
+      select-case使用时遇到的问题
+    </a>
+  </h1>
+  <div class="post-meta">
+    
+    <span class="meta-item pc-show">
+      <i class="fa fa-calendar-o"></i>
+      <span class="language" data-lan="publish">发布于</span>
+      <span class="publish-time" data-t="2020-10-22 16:48:01">2020-10-22</span>
+      <span class="post-meta-divider pc-show">|</span>
+    </span>
+    
+    <span class="meta-item">
+      <i class="fa fa-folder-o"></i>
+      <span class="pc-show language" data-lan="category-in">分类于</span>
+      
+      
+      <a href="http://changzee.github.io.git/tag/pvbyrslD7/">
+        <span>Golang</span>
+      </a>
+      
+      
+    </span>
+    <span class="post-meta-divider">|</span>
+    
+    <span class="meta-item">
+      <i class="fa fa-clock-o"></i>
+      <span>3<span class="language" data-lan="minute">分钟</span></span>
+    </span>
+    <span class="meta-item">
+      <span class="post-meta-divider">|</span>
+      <i class="fa fa-file-word-o"></i>
+      <span>566<span class="pc-show language" data-lan="words">字数</span></span>
+    </span>
+    
+  </div>
+</section>
+      <div class="post-body">
+        
+        
+          
+            <!-- 没有手动摘要切开启了自动摘要,则根据配置筛除摘要内容 -->
+            
+            
+              
+              
+              
+            
+              
+              
+              
+            
+              
+              
+              
+            
+            
+              <p><p>上期在写渲染中台需求时碰到了几个挺有意思却挺基础的问题，记录一下防止重蹈覆辙。</p>
+<p>需求大概是这样的，我在特定条件下触发会两个周期性定时任务, 其中一个任务在每次结束时会检测某个条件分支，如果成立则使得两个任务都终止。比较常见的思路是同时启用两个协程，两个协程之间采用<code>CPS</code>的方式进行通信。例如下面这样子:</p>
+<pre><code class="language-go">cancelCtx, cancel := context.WithCancel(context.Background())
+
+                
+                  <!-- 自动摘要出来的内容有<code则补上结尾,防止格式错误 -->
+                  </code></pre>
+                
+              <p>
+            
+          
+        
+        
+        <div class="post-button text-center">
+          <a class="btn language" data-lan="read-more" href="http://changzee.github.io.git/post/select-case-shi-yong-shi-yu-dao-de-wen-ti/" rel="contents">
             阅读全文 »
           </a>
         </div>
@@ -883,6 +969,89 @@ scoop install sublime-text
 &lt;h3 id=&#34;json-显示插件-json-viewer-awesome&#34;&gt;JSON 显示插件 - JSON Viewer Awesome&lt;/h3&gt;
 &lt;h3 id=&#34;github-目录树-octotree&#34;&gt;Github 目录树 - Octotree&lt;/h3&gt;
 ">日常用到的一些开发工具汇总与推荐</a>
+      </div>
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="http://changzee.github.io.git/post/select-case-shi-yong-shi-yu-dao-de-wen-ti/"" data-c="
+          &lt;p&gt;上期在写渲染中台需求时碰到了几个挺有意思却挺基础的问题，记录一下防止重蹈覆辙。&lt;/p&gt;
+&lt;p&gt;需求大概是这样的，我在特定条件下触发会两个周期性定时任务, 其中一个任务在每次结束时会检测某个条件分支，如果成立则使得两个任务都终止。比较常见的思路是同时启用两个协程，两个协程之间采用&lt;code&gt;CPS&lt;/code&gt;的方式进行通信。例如下面这样子:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;cancelCtx, cancel := context.WithCancel(context.Background())
+
+go func() {
+  Loop: for {
+    select {
+      case &amp;lt;-time.NewTicket(5 * time.Minute).C:
+     	  // dosomething
+      case &amp;lt;-cancelCtx:
+      	break Loop // 结束协程
+    }
+  }
+}
+
+go func() {
+  Loop: for {
+    select {
+      case &amp;lt;-time.NewTicket(10 *time.Minute).C:
+        // do anothing thing ...
+        ...
+        
+      if condition == true {
+        cancel()
+        break Loop
+      }
+    }
+  }
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;但写的时候我觉得两个协程写起来感觉没那么直观，为什么我需要两个协程呢？所以采用了另外一种取巧的方式实现:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;go func() {
+  Loop: for {
+    select {
+      case &amp;lt;-time.NewTicker(5 * time.Minute).C:
+        // do something.
+      case &amp;lt;-time.NewTicker(10 * time.Minute).C:
+        // do another thing.
+        
+        ...
+      	if condition == true {
+        	break Loop
+      	}
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这时候尴尬就来了，在自测的时候我发现第二个分支永远不会触发。&lt;/p&gt;
+&lt;p&gt;这种写法问题的根源在于每一次&lt;code&gt;for...select&lt;/code&gt;时各个&lt;code&gt;case&lt;/code&gt;都会新建一个&lt;code&gt;channel&lt;/code&gt;，但我们这时候有多个分支。&lt;/p&gt;
+&lt;p&gt;第一次&lt;code&gt;for&lt;/code&gt;轮训:&lt;/p&gt;
+&lt;p&gt;分支一新建了一个&lt;code&gt;ticker&lt;/code&gt;, 等待5分钟后该分支满足触发条件。&lt;/p&gt;
+&lt;p&gt;分支二也新建了一个&lt;code&gt;ticker&lt;/code&gt;, 等待10分钟后该分支满足触发条件。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;select&lt;/code&gt;一直阻塞等待下属的分支触发，分支一比分支二先触发，选择执行分支一，然后第一次轮训结束。&lt;/p&gt;
+&lt;p&gt;接下来:&lt;/p&gt;
+&lt;p&gt;与第一次for轮训一样。&lt;/p&gt;
+&lt;p&gt;这时候只会执行到周期最短的那个分支。这与我之前的想法不太一致，我以为go编译器会智能地做一些优化，每次轮询到同一个&lt;code&gt;channel&lt;/code&gt;实例。解决这个问题的话也挺简单的，在&lt;code&gt;for&lt;/code&gt;循环之前先定义好各个分支的&lt;code&gt;channel&lt;/code&gt;就行了:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;tick1:= time.NewTicker(5 * time.Minute)
+tick2 := time.NewTicker(10 * time.Second)
+
+defer minTick.Stop()
+defer secondTick.Stop()
+go func() {
+  Loop: for {
+    select {
+      case &amp;lt;- tick1:
+        // do something.
+      case &amp;lt;- tick2:
+        // do another thing.
+        
+        ...
+      	if condition == true {
+        	break Loop
+      	}
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+">select-case使用时遇到的问题</a>
       </div>
       
       <div class="item">

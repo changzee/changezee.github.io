@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://changzee.github.io.git</id>
     <title>顶洋小巷</title>
-    <updated>2020-11-22T08:46:54.003Z</updated>
+    <updated>2020-11-22T08:48:40.266Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="http://changzee.github.io.git"/>
     <link rel="self" href="http://changzee.github.io.git/atom.xml"/>
@@ -89,6 +89,92 @@ scoop install sublime-text
 <h3 id="http-client-rest-client">Http Client - REST Client</h3>
 <h3 id="json-显示插件-json-viewer-awesome">JSON 显示插件 - JSON Viewer Awesome</h3>
 <h3 id="github-目录树-octotree">Github 目录树 - Octotree</h3>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[select-case使用时遇到的问题]]></title>
+        <id>http://changzee.github.io.git/post/select-case-shi-yong-shi-yu-dao-de-wen-ti/</id>
+        <link href="http://changzee.github.io.git/post/select-case-shi-yong-shi-yu-dao-de-wen-ti/">
+        </link>
+        <updated>2020-10-22T08:48:01.000Z</updated>
+        <content type="html"><![CDATA[<p>上期在写渲染中台需求时碰到了几个挺有意思却挺基础的问题，记录一下防止重蹈覆辙。</p>
+<p>需求大概是这样的，我在特定条件下触发会两个周期性定时任务, 其中一个任务在每次结束时会检测某个条件分支，如果成立则使得两个任务都终止。比较常见的思路是同时启用两个协程，两个协程之间采用<code>CPS</code>的方式进行通信。例如下面这样子:</p>
+<pre><code class="language-go">cancelCtx, cancel := context.WithCancel(context.Background())
+
+go func() {
+  Loop: for {
+    select {
+      case &lt;-time.NewTicket(5 * time.Minute).C:
+     	  // dosomething
+      case &lt;-cancelCtx:
+      	break Loop // 结束协程
+    }
+  }
+}
+
+go func() {
+  Loop: for {
+    select {
+      case &lt;-time.NewTicket(10 *time.Minute).C:
+        // do anothing thing ...
+        ...
+        
+      if condition == true {
+        cancel()
+        break Loop
+      }
+    }
+  }
+}
+
+</code></pre>
+<p>但写的时候我觉得两个协程写起来感觉没那么直观，为什么我需要两个协程呢？所以采用了另外一种取巧的方式实现:</p>
+<pre><code class="language-go">go func() {
+  Loop: for {
+    select {
+      case &lt;-time.NewTicker(5 * time.Minute).C:
+        // do something.
+      case &lt;-time.NewTicker(10 * time.Minute).C:
+        // do another thing.
+        
+        ...
+      	if condition == true {
+        	break Loop
+      	}
+    }
+  }
+}
+</code></pre>
+<p>这时候尴尬就来了，在自测的时候我发现第二个分支永远不会触发。</p>
+<p>这种写法问题的根源在于每一次<code>for...select</code>时各个<code>case</code>都会新建一个<code>channel</code>，但我们这时候有多个分支。</p>
+<p>第一次<code>for</code>轮训:</p>
+<p>分支一新建了一个<code>ticker</code>, 等待5分钟后该分支满足触发条件。</p>
+<p>分支二也新建了一个<code>ticker</code>, 等待10分钟后该分支满足触发条件。</p>
+<p><code>select</code>一直阻塞等待下属的分支触发，分支一比分支二先触发，选择执行分支一，然后第一次轮训结束。</p>
+<p>接下来:</p>
+<p>与第一次for轮训一样。</p>
+<p>这时候只会执行到周期最短的那个分支。这与我之前的想法不太一致，我以为go编译器会智能地做一些优化，每次轮询到同一个<code>channel</code>实例。解决这个问题的话也挺简单的，在<code>for</code>循环之前先定义好各个分支的<code>channel</code>就行了:</p>
+<pre><code class="language-go">tick1:= time.NewTicker(5 * time.Minute)
+tick2 := time.NewTicker(10 * time.Second)
+
+defer minTick.Stop()
+defer secondTick.Stop()
+go func() {
+  Loop: for {
+    select {
+      case &lt;- tick1:
+        // do something.
+      case &lt;- tick2:
+        // do another thing.
+        
+        ...
+      	if condition == true {
+        	break Loop
+      	}
+    }
+  }
+}
+</code></pre>
 ]]></content>
     </entry>
     <entry>
