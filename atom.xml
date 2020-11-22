@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://changzee.github.io.git</id>
     <title>顶洋小巷</title>
-    <updated>2020-11-22T08:38:54.205Z</updated>
+    <updated>2020-11-22T08:40:18.492Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="http://changzee.github.io.git"/>
     <link rel="self" href="http://changzee.github.io.git/atom.xml"/>
@@ -10,6 +10,27 @@
     <logo>http://changzee.github.io.git/images/avatar.png</logo>
     <icon>http://changzee.github.io.git/favicon.ico</icon>
     <rights>All rights reserved 2020, 顶洋小巷</rights>
+    <entry>
+        <title type="html"><![CDATA[Laravel实践中遇到的一些坑]]></title>
+        <id>http://changzee.github.io.git/post/laravel-shi-jian-zhong-yu-dao-de-yi-xie-keng/</id>
+        <link href="http://changzee.github.io.git/post/laravel-shi-jian-zhong-yu-dao-de-yi-xie-keng/">
+        </link>
+        <updated>2020-11-22T08:39:41.000Z</updated>
+        <content type="html"><![CDATA[<ol>
+<li>
+<p><code>mpociot/laravel-apidoc-generator</code>由于注释星号个数问题导致生成的接口文档缺失。正确格式为 <code>/** xxxx */</code>, 开头的星号只能为2个</p>
+</li>
+<li>
+<p><code>mpociot/laravel-apidoc-generator</code>运行文档生成命令时碰到下面的错误:</p>
+<pre><code>In SKUserProductController.php line 216:
+
+Unparenthesized `a ? b : c ? d : e` is deprecated. Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)`
+</code></pre>
+<p>原因是PHP7.4不支持了三元表达式的一些写法，更正对应的代码块或者用低版本的PHP运行。</p>
+</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[日常用到的一些开发工具汇总与推荐]]></title>
         <id>http://changzee.github.io.git/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/</id>
