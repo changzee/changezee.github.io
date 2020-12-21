@@ -9,7 +9,7 @@
 <meta name="description" content="记录一些日常学习笔记与感想～
 github: https://github.com/changzee">
 <meta name="theme-color" content="#000">
-<title>git标签   | 顶洋小巷</title>
+<title>Actor并发模型框架(protoactor-go)探索 | 顶洋小巷</title>
 <link rel="shortcut icon" href="/favicon.ico?v=1608564091751">
 <link rel="stylesheet" href="/media/css/gemini.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
@@ -39,7 +39,7 @@ github: https://github.com/changzee">
 
 
 
-  <meta name="description" content="git标签  " />
+  <meta name="description" content="Actor并发模型框架(protoactor-go)探索" />
   <meta name="keywords" content="" />
 </head>
 
@@ -191,7 +191,8 @@ github: https://github.com/changzee">
       <div class="sidebar-body gemini" id="sidebar_body">
         
           
-            
+            <div class="post-side-meta" id="post_side_meta">
+              
 <div class="sidebar-wrapper box-shadow-wrapper bg-color">
   <div class="sidebar-item">
     <img class="site-author-image right-motion" src="/images/avatar.png"/>
@@ -236,6 +237,204 @@ github: https://github.com/changzee">
 
 
 </div>
+            </div>
+            <div class="post-toc sidebar-body-active" id="post_toc" style="opacity: 1;">
+              <div class="toc-box right-motion">
+  <div class="toc-wrapper auto-number auto"
+    id="toc_wrapper">
+    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#actor%E7%B1%BB%E5%9E%8B">Actor类型</a></li>
+<li><a href="#%E5%AE%98%E6%96%B9demo">官方Demo</a>
+<ul>
+<li><a href="#hello-world">Hello world</a></li>
+<li><a href="#state-machines-setbehavior-pushbehavior-and-popbehavior">State machines / SetBehavior, PushBehavior and PopBehavior</a></li>
+<li><a href="#lifecycle-events-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%BA%8B%E4%BB%B6">Lifecycle events (生命周期事件)</a></li>
+<li><a href="#supervision">Supervision</a></li>
+<li><a href="#remote">Remote</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+</div>
+
+<script>
+
+  let lastTop = 0, lList = [], hList = [], postBody, lastIndex = -1;
+  let active = 'active-show', activeClass = 'active-current';
+  let tocWrapper = document.querySelector('#toc_wrapper');
+  let tocContent = tocWrapper.children[0];
+  let autoNumber = tocWrapper && tocWrapper.classList.contains('auto-number');
+
+  function addTocNumber(elem, deep) {
+    if (!elem) {
+      return;
+    }
+    let prop = elem.__proto__;
+
+    if (prop === HTMLUListElement.prototype) {
+      for (let i = 0; i < elem.children.length; i++) {
+        addTocNumber(elem.children[i], deep + (i + 1) + '.');
+      }
+    } else if (prop === HTMLLIElement.prototype) {
+      // 保存li元素
+      if (elem.children[0] && elem.children[0].__proto__ === HTMLAnchorElement.prototype) {
+        lList.push(elem);
+      }
+      for (let i = 0; i < elem.children.length; i++) {
+        let cur = elem.children[i];
+        if (cur.__proto__ === HTMLAnchorElement.prototype) {
+          if (autoNumber) {
+            cur.text = deep + ' ' + cur.text;
+          }
+        } else if (cur.__proto__ === HTMLUListElement.prototype) {
+          addTocNumber(cur, deep);
+        }
+      }
+    }
+  }
+
+  function removeParentActiveClass() {
+    let parents = tocContent.querySelectorAll('.' + active)
+    parents.forEach(function (elem) {
+      elem.classList.remove(active);
+    });
+  }
+
+  function addActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.add(activeClass);
+    }
+  }
+
+  function removeActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.remove(activeClass);
+    }
+  }
+
+  function addActiveLiElemment(elem, parent) {
+    if (!elem || elem === parent) {
+      return;
+    } else {
+      if (elem.__proto__ === HTMLLIElement.prototype) {
+        elem.classList.add(active);
+      }
+      addActiveLiElemment(elem.parentElement, parent);
+    }
+  }
+
+  function showToc() {
+    if (tocWrapper) {
+      postBody = document.querySelector('#post_body');
+      for (let i = 0; i < postBody.children.length; i++) {
+        if (postBody.children[i].__proto__ === HTMLHeadingElement.prototype) {
+          hList.push(postBody.children[i]);
+        }
+      }
+      if (tocWrapper.classList.contains('compress')) {
+        tocContent.classList.add('closed');
+      } else if (tocWrapper.classList.contains('no_compress')) {
+        tocContent.classList.add('expanded');
+      } else {
+        if (hList.length > 10) {
+          active = 'active-hidden'
+          tocContent.classList.add('closed');
+        } else {
+          tocContent.classList.add('expanded');
+        }
+      }
+    }
+  }
+
+  (function () {
+    // 处理不是从#一级标题开始目录
+    if (tocContent.children.length === 1 && tocContent.children[0].__proto__ === HTMLLIElement.prototype) {
+      let con = tocContent.children[0].children[0];
+      tocContent.innerHTML = con.innerHTML;
+    }
+    let markdownItTOC = document.querySelector('.markdownIt-TOC');
+    let innerHeight = window.innerHeight;
+    markdownItTOC.style = `max-height: ${innerHeight - 80 > 0 ? innerHeight - 80 : innerHeight}px`
+    addTocNumber(tocContent, '');
+  })();
+
+  document.addEventListener('scroll', function (e) {
+    if (lList.length <= 0) {
+      return;
+    }
+    let scrollTop = document.scrollingElement.scrollTop + 10;
+    let dir;
+
+    if (lastTop - scrollTop > 0) {
+      dir = 'up';
+    } else {
+      dir = 'down';
+    }
+
+    lastTop = scrollTop;
+    if (scrollTop <= 0) {
+      if (lastIndex >= 0 && lastIndex < hList.length) {
+        lList[lastIndex].classList.remove(activeClass);
+      }
+      return;
+    }
+
+    let current = 0, hasFind = false;
+    for (let i = 0; i < hList.length; i++) {
+      if (hList[i].offsetTop > scrollTop) {
+        current = i;
+        hasFind = true;
+        break;
+      }
+    }
+    if (!hasFind && scrollTop > lList[lList.length - 1].offsetTop) {
+      current = hList.length - 1;
+    } else {
+      current--;
+    }
+    if (dir === 'down') {
+      if (current > lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex)
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    } else {
+      if (current < lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex);
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    }
+  });
+
+
+  window.addEventListener('load', function () {
+    showToc();
+    document.querySelector('#sidebar').style = 'display: block;';
+    tocWrapper.classList.add('toc-active');
+    setTimeout(function () {
+      if ("createEvent" in document) {
+        let evt = document.createEvent("HTMLEvents");
+        evt.initEvent("scroll", false, true);
+        document.dispatchEvent(evt);
+      }
+      else {
+        document.fireEvent("scroll");
+      }
+    }, 500)
+  })
+
+</script>
+            </div>
           
         
       </div>
@@ -323,8 +522,8 @@ github: https://github.com/changzee">
           <div class="section bg-color post post-page">
             <section class="post-header">
   <h1 class="post-title">
-    <a class="post-title-link" href="http://changzee.github.io/post/git-biao-qian/">
-      git标签  
+    <a class="post-title-link" href="http://changzee.github.io/post/actor-bing-fa-mo-xing-kuang-jia-protoactor-gotan-suo/">
+      Actor并发模型框架(protoactor-go)探索
     </a>
   </h1>
   <div class="post-meta">
@@ -332,23 +531,23 @@ github: https://github.com/changzee">
     <span class="meta-item pc-show">
       <i class="fa fa-calendar-o"></i>
       <span class="language" data-lan="publish">发布于</span>
-      <span class="publish-time" data-t="2020-11-22 16:49:30">2020-11-22</span>
+      <span class="publish-time" data-t="2020-11-21 11:20:19">2020-11-21</span>
       <span class="post-meta-divider pc-show">|</span>
     </span>
     
     <span class="meta-item">
       <i class="fa fa-clock-o"></i>
-      <span>1<span class="language" data-lan="minute">分钟</span></span>
+      <span>6<span class="language" data-lan="minute">分钟</span></span>
     </span>
     <span class="meta-item">
       <span class="post-meta-divider">|</span>
       <i class="fa fa-file-word-o"></i>
-      <span>117<span class="pc-show language" data-lan="words">字数</span></span>
+      <span>1122<span class="pc-show language" data-lan="words">字数</span></span>
     </span>
     
     
     
-    <span id="/post/git-biao-qian/" data-flag-title="git标签  " class="meta-item pc-show leancloud_visitors">
+    <span id="/post/actor-bing-fa-mo-xing-kuang-jia-protoactor-gotan-suo/" data-flag-title="Actor并发模型框架(protoactor-go)探索" class="meta-item pc-show leancloud_visitors">
       <span class="post-meta-divider">|</span>
       <i class="fa fa-eye"></i>
       <span><span class="language" data-lan="view">浏览量</span>：<span class="leancloud-visitors-count"></span></span>
@@ -357,14 +556,210 @@ github: https://github.com/changzee">
   </div>
 </section>
             <div class="post-body next-md-body" id="post_body">
-              <p>WIP   Work in progress, do not merge yet. // 开发中<br>
-LGTM Looks good to me. // Riview 完别人的 PR ，没有问题<br>
-PTAL Please take a look. // 帮我看下，一般都是请别人 review 自己的 PR<br>
-CC Carbon copy // 一般代表抄送别人的意思<br>
-RFC  —  request for comments. // 我觉得这个想法很好, 我们来一起讨论下<br>
-IIRC  —  if I recall correctly. // 如果我没记错<br>
-ACK  —  acknowledgement. // 我确认了或者我接受了,我承认了<br>
-NACK/NAK — negative acknowledgement. // 我不同意</p>
+              <p>在golang社区中，风靡着这么一句话:xxxx。其传达了一个朴素的理念，即采用消息传递的交互方式来避免多核或者分布式环境下进程间通信的复杂性问题。</p>
+<p>基于消息传递的并发模型主要有两种: Actor模型和CSP模型。这两种并发模型的主要区别是：</p>
+<ul>
+<li>
+<p>在Actor模型中，主角是Actor，Actor之间直接发送、接收消息；而在CSP模型中，主角是Channel，其并不关注谁发送消息，谁接受消息。</p>
+</li>
+<li>
+<p>在Actor模型中，Actor之间是直接通信的；而在CSP模型中，依靠Channel来通信。</p>
+</li>
+<li>
+<p>Actor模型中的耦合程度要高于CSP模型，因为cSP模型不关注消息发送者和接收者。</p>
+</li>
+<li>
+<p>Actor模型一般实现了位置透明性，天生分布式。</p>
+</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="/Users/haochang/Downloads/csp.png" alt="csp" loading="lazy"></figure>
+<p>我们都知道，golang在语言级别支持了csp模型，并推荐采用channel来进行各个goroutine之间的通信。但这并不意味着我们不能使用actor，很多第三方库提供了这种机制。其中比较完备的就是文章的主角——protoactor-go。</p>
+<h2 id="actor类型">Actor类型</h2>
+<p>protoactor-go支持三种类型的actor：local（本机）、remote（远程）、cluster grain（集群）。</p>
+<figure data-type="image" tabindex="2"><img src="/Users/haochang/Downloads/components.png" alt="img" loading="lazy"></figure>
+<ul>
+<li>
+<p>Local：同一进程中的 Actor</p>
+</li>
+<li>
+<p>Remote: 位于不同进程或其他服务器中的Actor。 Remote Actor之间的通信protoactor-go采用Protocol Buffers协议完成消息序列化。</p>
+</li>
+<li>
+<p>Cluster grain：一种远程Actor，但是生命周期和其他复杂性由protoactor-go库处理。 集群由Consul管理，并且可以通过网络寻址。 Consul管理集群成员和每个节点的可用性。</p>
+<p>proto-actor实现了位置透明性（local transparency），即一个Actor可以采用相同的方式与其他Actor进行通信，而不必考虑Actor的类型与所在的位置。</p>
+</li>
+</ul>
+<h2 id="官方demo">官方Demo</h2>
+<h3 id="hello-world">Hello world</h3>
+<pre><code class="language-go">type Hello struct{ Who string }
+type HelloActor struct{}
+
+// 每个actor都必须实现Receive方法
+func (state *HelloActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+    }
+}
+
+func main() {
+    context := actor.EmptyRootContext
+    props := actor.PropsFromProducer(func() actor.Actor { return &amp;HelloActor{} })
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+    console.ReadLine()
+}
+</code></pre>
+<p>Actor 接口：</p>
+<pre><code class="language-go">// Actor is the interface that defines the Receive method.
+//
+// Receive is sent messages to be processed from the mailbox associated with the instance of the actor
+type Actor interface {
+	Receive(c Context)
+}
+</code></pre>
+<h3 id="state-machines-setbehavior-pushbehavior-and-popbehavior">State machines / SetBehavior, PushBehavior and PopBehavior</h3>
+<pre><code class="language-go">type Hello struct{ Who string }
+type SetBehaviorActor struct{}
+
+func (state *SetBehaviorActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+      
+     		// 切换状态
+        context.SetBehavior(state.Other)
+    }
+}
+
+func (state *SetBehaviorActor) Other(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        fmt.Printf(&quot;%v, ey we are now handling messages in another behavior&quot;, msg.Who)
+    }
+}
+
+func NewSetBehaviorActor() actor.Actor {
+    return &amp;SetBehaviorActor{}
+}
+
+func main() {
+    context := actor.EmptyRootContext
+    props := actor.PropsFromProducer(NewSetBehaviorActor)
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+    console.ReadLine()
+}
+</code></pre>
+<h3 id="lifecycle-events-生命周期事件">Lifecycle events (生命周期事件)</h3>
+<pre><code class="language-go">type Hello struct{ Who string }
+type HelloActor struct{}
+
+func (state *HelloActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case *actor.Started: // 开始时执行接收到
+        fmt.Println(&quot;Started, initialize actor here&quot;)
+    case *actor.Stopping: // 结束时接收到
+        fmt.Println(&quot;Stopping, actor is about shut down&quot;)
+    case *actor.Stopped: // 已结束时接收到
+        fmt.Println(&quot;Stopped, actor and its children are stopped&quot;)
+    case *actor.Restarting: // 重启时接收到
+        fmt.Println(&quot;Restarting, actor is about restart&quot;)
+    case Hello: // 自定义消息
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+    }
+}
+
+func main() {
+    context := actor.EmptyRootContext
+    props := actor.PropsFromProducer(func() actor.Actor { return &amp;HelloActor{} })
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+
+    // why wait?
+    // Stop is a system message and is not processed through the user message mailbox
+    // thus, it will be handled _before_ any user message
+    // we only do this to show the correct order of events in the console
+    time.Sleep(1 * time.Second)
+    context.Stop(pid)
+
+    console.ReadLine()
+}
+</code></pre>
+<h3 id="supervision">Supervision</h3>
+<p>可以自定义对子actor的监管策略，如对失败的actor进行重启等操作。</p>
+<pre><code class="language-go">type Hello struct{ Who string }
+type ParentActor struct{}
+
+func (state *ParentActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        props := actor.PropsFromProducer(NewChildActor)
+        child := context.Spawn(props)
+        context.Send(child, msg)
+    }
+}
+
+func NewParentActor() actor.Actor {
+    return &amp;ParentActor{}
+}
+
+type ChildActor struct{}
+
+func (state *ChildActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case *actor.Started:
+        fmt.Println(&quot;Starting, initialize actor here&quot;)
+    case *actor.Stopping:
+        fmt.Println(&quot;Stopping, actor is about shut down&quot;)
+    case *actor.Stopped:
+        fmt.Println(&quot;Stopped, actor and its children are stopped&quot;)
+    case *actor.Restarting:
+        fmt.Println(&quot;Restarting, actor is about restart&quot;)
+    case Hello:
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+        panic(&quot;Ouch&quot;)
+    }
+}
+
+func NewChildActor() actor.Actor {
+    return &amp;ChildActor{}
+}
+
+func main() {
+    decider := func(reason interface{}) actor.Directive {
+        fmt.Println(&quot;handling failure for child&quot;)
+        return actor.StopDirective
+    }
+    supervisor := actor.NewOneForOneStrategy(10, 1000, decider)
+
+    context := actor.EmptyRootContext
+    props := actor.
+        FromProducer(NewParentActor).
+        WithSupervisor(supervisor)
+
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+
+    console.ReadLine()
+}
+</code></pre>
+<h3 id="remote">Remote</h3>
+<p>// 没有用到，后面有时间补充。。。</p>
+<p>未完待续。。。</p>
 
             </div>
             
@@ -377,7 +772,7 @@ NACK/NAK — negative acknowledgement. // 我不同意</p>
     </li>
     <li class="post-copyright-link">
       <strong class="language" data-lan="link">本文链接：</strong>
-      <a href="http://changzee.github.io/post/git-biao-qian/" title="git标签  ">http://changzee.github.io/post/git-biao-qian/</a>
+      <a href="http://changzee.github.io/post/actor-bing-fa-mo-xing-kuang-jia-protoactor-gotan-suo/" title="Actor并发模型框架(protoactor-go)探索">http://changzee.github.io/post/actor-bing-fa-mo-xing-kuang-jia-protoactor-gotan-suo/</a>
     </li>
     <li class="post-copyright-license">
       <strong class="language" data-lan="copyright">版权声明： </strong>
@@ -390,11 +785,15 @@ NACK/NAK — negative acknowledgement. // 我不同意</p>
   <div class="nav">
     <div class="nav-prev">
       
+        <i class="fa fa-chevron-left"></i>
+        <a class="nav-pc-next" title="日常用到的一些开发工具汇总与推荐" href="http://changzee.github.io/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/">日常用到的一些开发工具汇总与推荐</a class="nav-pc-next">
+        <a class="nav-mobile-prev" title="日常用到的一些开发工具汇总与推荐" href="http://changzee.github.io/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/">上一篇</a>
+      
     </div>
     <div class="nav-next">
       
-        <a class="nav-pc-next" title="日常用到的一些开发工具汇总与推荐" href="http://changzee.github.io/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/">日常用到的一些开发工具汇总与推荐</a>
-        <a class="nav-mobile-next" title="日常用到的一些开发工具汇总与推荐" href="http://changzee.github.io/post/ri-chang-yong-dao-de-yi-xie-kai-fa-gong-ju-hui-zong-yu-tui-jian/">下一篇</a>
+        <a class="nav-pc-next" title="select-case使用时遇到的问题" href="http://changzee.github.io/post/select-case-shi-yong-shi-yu-dao-de-wen-ti/">select-case使用时遇到的问题</a>
+        <a class="nav-mobile-next" title="select-case使用时遇到的问题" href="http://changzee.github.io/post/select-case-shi-yong-shi-yu-dao-de-wen-ti/">下一篇</a>
         <i class="fa fa-chevron-right"></i>
       
     </div>

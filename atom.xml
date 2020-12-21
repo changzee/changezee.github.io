@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://changzee.github.io</id>
     <title>顶洋小巷</title>
-    <updated>2020-11-22T09:52:43.448Z</updated>
+    <updated>2020-12-21T15:21:35.922Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="http://changzee.github.io"/>
     <link rel="self" href="http://changzee.github.io/atom.xml"/>
@@ -106,6 +106,218 @@ scoop install sublime-text
 <h3 id="http-client-rest-client">Http Client - REST Client</h3>
 <h3 id="json-显示插件-json-viewer-awesome">JSON 显示插件 - JSON Viewer Awesome</h3>
 <h3 id="github-目录树-octotree">Github 目录树 - Octotree</h3>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Actor并发模型框架(protoactor-go)探索]]></title>
+        <id>http://changzee.github.io/post/actor-bing-fa-mo-xing-kuang-jia-protoactor-gotan-suo/</id>
+        <link href="http://changzee.github.io/post/actor-bing-fa-mo-xing-kuang-jia-protoactor-gotan-suo/">
+        </link>
+        <updated>2020-11-21T03:20:19.000Z</updated>
+        <content type="html"><![CDATA[<p>在golang社区中，风靡着这么一句话:xxxx。其传达了一个朴素的理念，即采用消息传递的交互方式来避免多核或者分布式环境下进程间通信的复杂性问题。</p>
+<p>基于消息传递的并发模型主要有两种: Actor模型和CSP模型。这两种并发模型的主要区别是：</p>
+<ul>
+<li>
+<p>在Actor模型中，主角是Actor，Actor之间直接发送、接收消息；而在CSP模型中，主角是Channel，其并不关注谁发送消息，谁接受消息。</p>
+</li>
+<li>
+<p>在Actor模型中，Actor之间是直接通信的；而在CSP模型中，依靠Channel来通信。</p>
+</li>
+<li>
+<p>Actor模型中的耦合程度要高于CSP模型，因为cSP模型不关注消息发送者和接收者。</p>
+</li>
+<li>
+<p>Actor模型一般实现了位置透明性，天生分布式。</p>
+</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="/Users/haochang/Downloads/csp.png" alt="csp" loading="lazy"></figure>
+<p>我们都知道，golang在语言级别支持了csp模型，并推荐采用channel来进行各个goroutine之间的通信。但这并不意味着我们不能使用actor，很多第三方库提供了这种机制。其中比较完备的就是文章的主角——protoactor-go。</p>
+<h2 id="actor类型">Actor类型</h2>
+<p>protoactor-go支持三种类型的actor：local（本机）、remote（远程）、cluster grain（集群）。</p>
+<figure data-type="image" tabindex="2"><img src="/Users/haochang/Downloads/components.png" alt="img" loading="lazy"></figure>
+<ul>
+<li>
+<p>Local：同一进程中的 Actor</p>
+</li>
+<li>
+<p>Remote: 位于不同进程或其他服务器中的Actor。 Remote Actor之间的通信protoactor-go采用Protocol Buffers协议完成消息序列化。</p>
+</li>
+<li>
+<p>Cluster grain：一种远程Actor，但是生命周期和其他复杂性由protoactor-go库处理。 集群由Consul管理，并且可以通过网络寻址。 Consul管理集群成员和每个节点的可用性。</p>
+<p>proto-actor实现了位置透明性（local transparency），即一个Actor可以采用相同的方式与其他Actor进行通信，而不必考虑Actor的类型与所在的位置。</p>
+</li>
+</ul>
+<h2 id="官方demo">官方Demo</h2>
+<h3 id="hello-world">Hello world</h3>
+<pre><code class="language-go">type Hello struct{ Who string }
+type HelloActor struct{}
+
+// 每个actor都必须实现Receive方法
+func (state *HelloActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+    }
+}
+
+func main() {
+    context := actor.EmptyRootContext
+    props := actor.PropsFromProducer(func() actor.Actor { return &amp;HelloActor{} })
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+    console.ReadLine()
+}
+</code></pre>
+<p>Actor 接口：</p>
+<pre><code class="language-go">// Actor is the interface that defines the Receive method.
+//
+// Receive is sent messages to be processed from the mailbox associated with the instance of the actor
+type Actor interface {
+	Receive(c Context)
+}
+</code></pre>
+<h3 id="state-machines-setbehavior-pushbehavior-and-popbehavior">State machines / SetBehavior, PushBehavior and PopBehavior</h3>
+<pre><code class="language-go">type Hello struct{ Who string }
+type SetBehaviorActor struct{}
+
+func (state *SetBehaviorActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+      
+     		// 切换状态
+        context.SetBehavior(state.Other)
+    }
+}
+
+func (state *SetBehaviorActor) Other(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        fmt.Printf(&quot;%v, ey we are now handling messages in another behavior&quot;, msg.Who)
+    }
+}
+
+func NewSetBehaviorActor() actor.Actor {
+    return &amp;SetBehaviorActor{}
+}
+
+func main() {
+    context := actor.EmptyRootContext
+    props := actor.PropsFromProducer(NewSetBehaviorActor)
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+    console.ReadLine()
+}
+</code></pre>
+<h3 id="lifecycle-events-生命周期事件">Lifecycle events (生命周期事件)</h3>
+<pre><code class="language-go">type Hello struct{ Who string }
+type HelloActor struct{}
+
+func (state *HelloActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case *actor.Started: // 开始时执行接收到
+        fmt.Println(&quot;Started, initialize actor here&quot;)
+    case *actor.Stopping: // 结束时接收到
+        fmt.Println(&quot;Stopping, actor is about shut down&quot;)
+    case *actor.Stopped: // 已结束时接收到
+        fmt.Println(&quot;Stopped, actor and its children are stopped&quot;)
+    case *actor.Restarting: // 重启时接收到
+        fmt.Println(&quot;Restarting, actor is about restart&quot;)
+    case Hello: // 自定义消息
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+    }
+}
+
+func main() {
+    context := actor.EmptyRootContext
+    props := actor.PropsFromProducer(func() actor.Actor { return &amp;HelloActor{} })
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+
+    // why wait?
+    // Stop is a system message and is not processed through the user message mailbox
+    // thus, it will be handled _before_ any user message
+    // we only do this to show the correct order of events in the console
+    time.Sleep(1 * time.Second)
+    context.Stop(pid)
+
+    console.ReadLine()
+}
+</code></pre>
+<h3 id="supervision">Supervision</h3>
+<p>可以自定义对子actor的监管策略，如对失败的actor进行重启等操作。</p>
+<pre><code class="language-go">type Hello struct{ Who string }
+type ParentActor struct{}
+
+func (state *ParentActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case Hello:
+        props := actor.PropsFromProducer(NewChildActor)
+        child := context.Spawn(props)
+        context.Send(child, msg)
+    }
+}
+
+func NewParentActor() actor.Actor {
+    return &amp;ParentActor{}
+}
+
+type ChildActor struct{}
+
+func (state *ChildActor) Receive(context actor.Context) {
+    switch msg := context.Message().(type) {
+    case *actor.Started:
+        fmt.Println(&quot;Starting, initialize actor here&quot;)
+    case *actor.Stopping:
+        fmt.Println(&quot;Stopping, actor is about shut down&quot;)
+    case *actor.Stopped:
+        fmt.Println(&quot;Stopped, actor and its children are stopped&quot;)
+    case *actor.Restarting:
+        fmt.Println(&quot;Restarting, actor is about restart&quot;)
+    case Hello:
+        fmt.Printf(&quot;Hello %v\n&quot;, msg.Who)
+        panic(&quot;Ouch&quot;)
+    }
+}
+
+func NewChildActor() actor.Actor {
+    return &amp;ChildActor{}
+}
+
+func main() {
+    decider := func(reason interface{}) actor.Directive {
+        fmt.Println(&quot;handling failure for child&quot;)
+        return actor.StopDirective
+    }
+    supervisor := actor.NewOneForOneStrategy(10, 1000, decider)
+
+    context := actor.EmptyRootContext
+    props := actor.
+        FromProducer(NewParentActor).
+        WithSupervisor(supervisor)
+
+    pid, err := context.Spawn(props)
+    if err != nil {
+        panic(err)
+    }
+    context.Send(pid, Hello{Who: &quot;Roger&quot;})
+
+    console.ReadLine()
+}
+</code></pre>
+<h3 id="remote">Remote</h3>
+<p>// 没有用到，后面有时间补充。。。</p>
+<p>未完待续。。。</p>
 ]]></content>
     </entry>
     <entry>
