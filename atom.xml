@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://changzee.github.io</id>
     <title>顶洋小巷</title>
-    <updated>2020-12-21T15:22:08.399Z</updated>
+    <updated>2020-12-21T15:23:18.324Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="http://changzee.github.io"/>
     <link rel="self" href="http://changzee.github.io/atom.xml"/>
@@ -683,6 +683,7 @@ if err != nil {
 	return errors2.WithStack(errors.ServiceInnerError)
 }
 </code></pre>
+<p>当然，直接panic也是一种不错的方式。</p>
 <h4 id="携带数据的错误值">携带数据的错误值</h4>
 <p>如何为错误值包裹一层数据是件比较难的事，因为如果直接修改全局错误的话会导致在上层不能比对特定的错误，对此借鉴了标准库的一些写法:</p>
 <pre><code class="language-go">// withData is a error with some specific data.

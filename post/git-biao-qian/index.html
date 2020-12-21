@@ -10,7 +10,7 @@
 github: https://github.com/changzee">
 <meta name="theme-color" content="#000">
 <title>git标签   | 顶洋小巷</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1608564117961">
+<link rel="shortcut icon" href="/favicon.ico?v=1608564194709">
 <link rel="stylesheet" href="/media/css/gemini.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -1553,6 +1553,7 @@ if err != nil {
 	return errors2.WithStack(errors.ServiceInnerError)
 }
 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;当然，直接panic也是一种不错的方式。&lt;/p&gt;
 &lt;h4 id=&#34;携带数据的错误值&#34;&gt;携带数据的错误值&lt;/h4&gt;
 &lt;p&gt;如何为错误值包裹一层数据是件比较难的事，因为如果直接修改全局错误的话会导致在上层不能比对特定的错误，对此借鉴了标准库的一些写法:&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;// withData is a error with some specific data.
